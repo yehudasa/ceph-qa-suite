@@ -19,6 +19,7 @@ tasks:
     pools: [base]
     ops: 4000
     objects: 500
+    balance_reads: true
     op_weights:
       read: 100
       write: 100
