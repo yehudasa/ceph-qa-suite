@@ -316,6 +316,13 @@ class FuseMount(CephFSMount):
             ],
         )
 
+    def _asok_path(self):
+        return "/var/run/ceph/ceph-{0}.*.asok".format(self.client_id)
+
+    @property
+    def _prefix(self):
+        return ""
+
     def _admin_socket(self, args):
         pyscript = """
 import glob
@@ -324,7 +331,14 @@ import os
 import subprocess
 
 def find_socket(client_name):
-        files = glob.glob("/var/run/ceph/ceph-{{client_name}}.*.asok".format(client_name=client_name))
+        asok_path = "{asok_path}"
+        files = glob.glob(asok_path)
+
+        # Given a non-glob path, it better be there
+        if "*" not in asok_path:
+            assert(len(files) == 1)
+            return files[0]
+
         for f in files:
                 pid = re.match(".*\.(\d+)\.asok$", f).group(1)
                 if os.path.exists("/proc/{{0}}".format(pid)):
@@ -332,7 +346,9 @@ def find_socket(client_name):
         raise RuntimeError("Client socket {{0}} not found".format(client_name))
 
 print find_socket("{client_name}")
-""".format(client_name="client.{0}".format(self.client_id))
+""".format(
+            asok_path=self._asok_path(),
+            client_name="client.{0}".format(self.client_id))
 
         # Find the admin socket
         p = self.client_remote.run(args=[
@@ -343,7 +359,7 @@ print find_socket("{client_name}")
 
         # Query client ID from admin socket
         p = self.client_remote.run(
-            args=['sudo', 'ceph', '--admin-daemon', asok_path] + args,
+            args=['sudo', self._prefix + 'ceph', '--admin-daemon', asok_path] + args,
             stdout=StringIO())
         return json.loads(p.stdout.getvalue())
 
