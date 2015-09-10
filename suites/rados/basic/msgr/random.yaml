@@ -4,3 +4,4 @@ overrides:
       global:
         ms type: random
         enable experimental unrecoverable data corrupting features: '*'
+        osd read ec check for errors: 1
