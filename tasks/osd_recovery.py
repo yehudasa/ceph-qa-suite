@@ -170,6 +170,9 @@ def test_incomplete_pgs(ctx, config):
     # move it back
     manager.raw_cluster_cmd('osd', 'in', '0', '1')
     manager.raw_cluster_cmd('osd', 'out', '2', '3')
+
+    time.sleep(30)
+
     manager.raw_cluster_cmd('tell', 'osd.0', 'flush_pg_stats')
     manager.raw_cluster_cmd('tell', 'osd.1', 'flush_pg_stats')
     manager.raw_cluster_cmd('tell', 'osd.2', 'flush_pg_stats')
