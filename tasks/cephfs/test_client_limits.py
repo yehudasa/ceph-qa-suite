@@ -172,7 +172,7 @@ class TestClientLimits(CephFSTestCase):
         self.mount_a.create_n_files("testdir/file", max_requests + 100)
 
         # Wait for the health warnings. Assume mds can handle 10 request per second at least
-        self.wait_for_health("failing to advance its oldest client/flush tid", max_requests / 10)
+        self.wait_for_health("failing to advance its oldest_client_tid", max_requests / 10)
 
     @needs_trimming
     def test_client_cache_size(self):
